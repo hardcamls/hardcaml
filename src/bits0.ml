@@ -39,6 +39,7 @@ let bits_per_word = 64
 let log_bits_per_word = 6
 let shift_bits_to_bytes = 3
 let shift_bytes_to_words = 3
+let shift_bytes_to_words32 = 2
 let width_mask = 0b11_1111
 let words_of_width width = (width + bits_per_word - 1) lsr log_bits_per_word
 let bytes_of_width width = words_of_width width lsl shift_bytes_to_words
@@ -60,6 +61,17 @@ let unsafe_get_int64 (t : t) i =
 
 let unsafe_set_int64 (t : t) i x =
   Bytes.unsafe_set_int64 t ((i lsl shift_bytes_to_words) + offset_for_data) x
+;;
+
+external unsafe_get_int32 : bytes -> int -> int32 = "%caml_bytes_get32u"
+external unsafe_set_int32 : bytes -> int -> int32 -> unit = "%caml_bytes_set32u"
+
+let unsafe_get_int32 (t : t) i =
+  unsafe_get_int32 t ((i lsl shift_bytes_to_words32) + offset_for_data)
+;;
+
+let unsafe_set_int32 (t : t) i x =
+  unsafe_set_int32 t ((i lsl shift_bytes_to_words32) + offset_for_data) x
 ;;
 
 let mask (t : t) =
@@ -91,4 +103,14 @@ let init_int64 ~width ~f =
   done;
   mask t;
   t
+;;
+
+let blit_data dst src =
+  let words = min (words dst) (words src) in
+  Bytes.unsafe_blit
+    ~src
+    ~src_pos:offset_for_data
+    ~dst
+    ~dst_pos:offset_for_data
+    ~len:(words lsl shift_bytes_to_words)
 ;;

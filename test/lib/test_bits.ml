@@ -37,7 +37,7 @@ let%expect_test "set of [Bits.t]s" =
   print_s
     [%sexp
       (Set.of_list (module Bits) (List.map [ "0"; "1"; "01"; "11" ] ~f:of_bit_string)
-       : Set.M(Bits).t)];
+        : Set.M(Bits).t)];
   [%expect {|
     (0 1 01 11) |}]
 ;;
@@ -439,8 +439,8 @@ module Make (R : Require) = struct
     List.iter config.prims ~f:(fun op ->
       let rec loop i =
         if i < config.iterations
-        && (T.run op here config.min_bit_width config.max_bit_width
-            || not stop_on_first_primitive_error)
+           && (T.run op here config.min_bit_width config.max_bit_width
+              || not stop_on_first_primitive_error)
         then loop (i + 1)
       in
       loop 0)
@@ -475,27 +475,27 @@ let%expect_test "BadPrimitives" =
       (iterations    1)
       (min_bit_width 1)
       (max_bit_width 20)))
-    (* require-failed: lib/hardcaml/hardcaml/test/lib/test_bits.ml:LINE:COL. *)
+    (* require-failed: hardcaml/test/lib/test_bits.ml:LINE:COL. *)
     (mismatch
       (operation (110111000101100 +: 001000001100100))
       (result1 111111010010000)
       (result2 000000101101111))
-    (* require-failed: lib/hardcaml/hardcaml/test/lib/test_bits.ml:LINE:COL. *)
+    (* require-failed: hardcaml/test/lib/test_bits.ml:LINE:COL. *)
     (mismatch
       (operation (101 *: 0000))
       (result1 0000000)
       (result2 1111111))
-    (* require-failed: lib/hardcaml/hardcaml/test/lib/test_bits.ml:LINE:COL. *)
+    (* require-failed: hardcaml/test/lib/test_bits.ml:LINE:COL. *)
     (mismatch
       (operation (select 0111100110000011 10 3))
       (result1 00110000)
       (result2 11001111))
-    (* require-failed: lib/hardcaml/hardcaml/test/lib/test_bits.ml:LINE:COL. *)
+    (* require-failed: hardcaml/test/lib/test_bits.ml:LINE:COL. *)
     (mismatch
       (operation (mux 0 (0011 0000)))
       (result1 0011)
       (result2 1100))
-    (* require-failed: lib/hardcaml/hardcaml/test/lib/test_bits.ml:LINE:COL. *)
+    (* require-failed: hardcaml/test/lib/test_bits.ml:LINE:COL. *)
     (mismatch
       (operation (
         concat (1100101111 00001100011100 11101011010 00 01101101011111101000)))

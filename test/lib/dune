@@ -1,4 +1,6 @@
 (library (name hardcaml_test)
- (libraries core expect_test_helpers_async expect_test_helpers_core hardcaml
-  hardcaml_waveterm)
+ (libraries core_kernel expect_test_helpers_core hardcaml
+  hardcaml_waveterm zarith_stubs_js)
+ (flags (:standard -w -49))
+ (inline_tests (modes best js))
  (preprocess (pps ppx_deriving_hardcaml ppx_jane)))

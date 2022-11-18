@@ -249,7 +249,7 @@ let%expect_test "generate hierarchy exn" =
       (circuit_name inner)
       (input_and_output_names (a)))) |}]
 ;;
-
+(*
 open Async
 open Expect_test_helpers_async
 
@@ -487,3 +487,4 @@ let%expect_test "In_directory" =
     end architecture; |}];
   return ()
 ;;
+   *)

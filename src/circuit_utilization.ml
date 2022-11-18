@@ -86,7 +86,8 @@ module Multiplexers = struct
              Map.add_exn
                u.multiplexers
                ~key
-               ~data:{ max_instance_bits = number_of_data_elements; total_bits; count = 1 }
+               ~data:
+                 { max_instance_bits = number_of_data_elements; total_bits; count = 1 }
            | Some data ->
              Map.set
                u.multiplexers
@@ -103,8 +104,7 @@ end
 module Memory = struct
   module T = struct
     type t =
-      {
-        data_width : int
+      { data_width : int
       ; depth : int
       ; total_bits : int
       }
@@ -156,24 +156,15 @@ module Memories = struct
   ;;
 end
 
-module rec Instantiation : sig
-  type t =
+module Instantiation = struct
+  type 'a t =
     | Instantiation of string
-    | Submodule of T.t
-  [@@deriving sexp_of]
-end = struct
-  type t =
-    | Instantiation of string
-    | Submodule of T.t
+    | Submodule of 'a
   [@@deriving sexp_of]
 end
 
-and Instantiations : sig
-  type t = Instantiation.t list [@@deriving sexp_of]
-
-  val add : ?u:t -> Signal.t -> t option
-end = struct
-  type t = Instantiation.t list [@@deriving sexp_of]
+module Instantiations = struct
+  type 'a t = 'a Instantiation.t list [@@deriving sexp_of]
 
   let none = []
 
@@ -187,64 +178,37 @@ end = struct
   ;;
 end
 
-and T : sig
-  type t =
-    { name : string
-    ; adders : Total_and_max_bits.t option
-    ; subtractors : Total_and_max_bits.t option
-    ; unsigned_multipliers : Total_and_max_bits.t option
-    ; signed_multipliers : Total_and_max_bits.t option
-    ; and_gates : Total_bits.t option
-    ; or_gates : Total_bits.t option
-    ; xor_gates : Total_bits.t option
-    ; not_gates : Total_bits.t option
-    ; equals : Total_and_max_bits.t option
-    ; comparators : Total_and_max_bits.t option
-    ; multiplexers : Multiplexers.t option
-    ; registers : Total_bits.t option
-    ; memories : Memories.t option (* the following do not generate gates. *)
-    ; constants : Total_bits.t option
-    ; wires : Total_bits.t option
-    ; concatenation : Total_bits.t option
-    ; part_selects : Total_bits.t option (* (recursive) sub modules. *)
-    ; instantiations : Instantiations.t option
-    }
-  [@@deriving sexp_of]
-end = struct
-  type t =
-    { name : string
-    ; adders : Total_and_max_bits.t option [@sexp.option]
-    ; subtractors : Total_and_max_bits.t option [@sexp.option]
-    ; unsigned_multipliers : Total_and_max_bits.t option [@sexp.option]
-    ; signed_multipliers : Total_and_max_bits.t option [@sexp.option]
-    ; and_gates : Total_bits.t option [@sexp.option]
-    ; or_gates : Total_bits.t option [@sexp.option]
-    ; xor_gates : Total_bits.t option [@sexp.option]
-    ; not_gates : Total_bits.t option [@sexp.option]
-    ; equals : Total_and_max_bits.t option [@sexp.option]
-    ; comparators : Total_and_max_bits.t option [@sexp.option]
-    ; multiplexers : Multiplexers.t option [@sexp.option]
-    ; registers : Total_bits.t option [@sexp.option]
-    ; memories : Memories.t option [@sexp.option]
-    ; constants : Total_bits.t option [@sexp.option]
-    ; wires : Total_bits.t option [@sexp.option]
-    ; concatenation : Total_bits.t option [@sexp.option]
-    ; part_selects : Total_bits.t option [@sexp.option]
-    ; instantiations : Instantiations.t option [@sexp.option]
-    }
-  [@@deriving sexp_of]
-end
+type t =
+  { name : string
+  ; adders : Total_and_max_bits.t option [@sexp.option]
+  ; subtractors : Total_and_max_bits.t option [@sexp.option]
+  ; unsigned_multipliers : Total_and_max_bits.t option [@sexp.option]
+  ; signed_multipliers : Total_and_max_bits.t option [@sexp.option]
+  ; and_gates : Total_bits.t option [@sexp.option]
+  ; or_gates : Total_bits.t option [@sexp.option]
+  ; xor_gates : Total_bits.t option [@sexp.option]
+  ; not_gates : Total_bits.t option [@sexp.option]
+  ; equals : Total_and_max_bits.t option [@sexp.option]
+  ; comparators : Total_and_max_bits.t option [@sexp.option]
+  ; multiplexers : Multiplexers.t option [@sexp.option]
+  ; registers : Total_bits.t option [@sexp.option]
+  ; memories : Memories.t option [@sexp.option]
+  ; constants : Total_bits.t option [@sexp.option]
+  ; wires : Total_bits.t option [@sexp.option]
+  ; concatenation : Total_bits.t option [@sexp.option]
+  ; part_selects : Total_bits.t option [@sexp.option]
+  ; instantiations : t Instantiations.t option [@sexp.option]
+  }
+[@@deriving sexp_of]
 
-type t = T.t [@@deriving sexp_of]
-
-let rec create ?database circuit =
+let rec create ?(database : Circuit_database.t option) (circuit : Circuit.t) =
   let expand_submodules t =
     match database with
     | None -> t
     | Some database ->
       { t with
-        T.instantiations =
-          Option.map t.T.instantiations ~f:(fun instantiations ->
+        instantiations =
+          Option.map t.instantiations ~f:(fun instantiations ->
             List.map instantiations ~f:(function
               | Instantiation.Instantiation name as inst ->
                 (match Circuit_database.find database ~mangled_name:name with
@@ -256,7 +220,7 @@ let rec create ?database circuit =
   Signal_graph.fold
     (Circuit.signal_graph circuit)
     ~init:
-      { T.name = Circuit.name circuit
+      { name = Circuit.name circuit
       ; constants = None
       ; adders = None
       ; subtractors = None

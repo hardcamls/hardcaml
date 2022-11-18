@@ -133,9 +133,9 @@ let%test_unit "registers/memories not eliminated" =
     ~trials
     (Generator.gen_circuit ~allow_inputs:true ~depth:3)
     ~f:(fun circuit ->
-      let circuit1 = Dedup.deduplicate circuit in
-      [%test_result: int] (num_registers circuit1) ~expect:(num_registers circuit);
-      [%test_result: int] (num_memories circuit1) ~expect:(num_memories circuit))
+    let circuit1 = Dedup.deduplicate circuit in
+    [%test_result: int] (num_registers circuit1) ~expect:(num_registers circuit);
+    [%test_result: int] (num_memories circuit1) ~expect:(num_memories circuit))
 ;;
 
 let cycle_count = 10
@@ -162,7 +162,7 @@ let gen_circuit_and_inputs =
 ;;
 
 let%test_unit "sufficient portion of generated circuits is not just constant outputs." =
-  let random = Splittable_random.State.create (Base.Random.State.make [| 0xdeadbeef |]) in
+  let random = Splittable_random.State.create (Base.Random.State.make [| 0x7eadbeef |]) in
   let number_of_circuits = 1_000 in
   let results =
     List.init number_of_circuits ~f:(fun _ ->
