@@ -1,0 +1,5 @@
+(library (name hardcaml_test_js)
+ (libraries core_kernel hardcaml zarith_stubs_js)
+ (flags (:standard -w -49))
+ (inline_tests (modes js best))
+ (preprocess (pps ppx_deriving_hardcaml ppx_jane)))
