@@ -1,4 +1,4 @@
-(library (name hardcaml) (public_name hardcaml) (c_names bits_stubs)
+(library (name hardcaml) (public_name hardcaml) (foreign_stubs (language c) (names bits_stubs))
  (libraries base bin_prot bigarray dynlink core_kernel.flags stdio
   topological_sort unix zarith)
  (flags (:standard -w -49))
