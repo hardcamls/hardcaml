@@ -938,18 +938,7 @@ module Const_prop = struct
       | _ -> a <: b
     ;;
 
-    let concat_msb l =
-      let rec f l nl =
-        match l with
-        | [] -> List.rev nl
-        | h :: t when is_const h ->
-          (match nl with
-           | h' :: t' when is_const h' -> f t (cst (Bits.concat_msb [ cv h'; cv h ]) :: t')
-           | _ -> f t (h :: nl))
-        | h :: t -> f t (h :: nl)
-      in
-      concat_msb (f l [])
-    ;;
+    let concat_msb l = concat_msb l
 
     (* {[
          let is_rom els =
